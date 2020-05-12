@@ -44,6 +44,8 @@ def train(batch_size: int, epochs: int):
     for epoch in range(epochs):
         running_loss = 0.0
         for i, (inputs, labels) in enumerate(train_loader, 0):
+            inputs.to(device)
+            labels.to(device)
             # zero the parameter gradients
             optimizer.zero_grad()
 
@@ -62,6 +64,8 @@ def train(batch_size: int, epochs: int):
     total = 0
     with torch.no_grad():
         for (images, labels) in test_loader:
+            images.to(device)
+            labels.to(device)
             outputs = net(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
