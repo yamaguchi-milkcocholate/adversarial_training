@@ -42,7 +42,7 @@ def train(batch_size: int, epochs: int):
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     for epoch in range(epochs):
-        train_loss = 0.0
+        running_loss = 0.0
         for i, (inputs, labels) in enumerate(train_loader, 0):
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -54,9 +54,9 @@ def train(batch_size: int, epochs: int):
             optimizer.step()
 
             # print statistics
-            train_loss = loss.item()
+            running_loss += loss.item()
         print('[{:d}/{:d}] loss: {:.3f} test: {:.3f}'.format(
-            epoch + 1, epochs, train_loss / batch_size, test(test_loader=test_loader, model=net, device=device)))
+            epoch + 1, epochs, running_loss / len(train_loader), test(test_loader=test_loader, model=net, device=device)))
     print('Finished Training')
     print('Accuracy: {:.2f} %%'.format(test(test_loader=test_loader, model=net, device=device)))
     ModelRepository.save(filename='GTSRB/model.p', model=net)
