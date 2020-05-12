@@ -7,7 +7,7 @@ from torchsummary import summary
 import torch
 import numpy as np
 from time import time
-from src.storage.repositories import LISARepository
+from src.storage.datasetrepo import LISARepository
 from src.trains.models import LISACNN
 
 
