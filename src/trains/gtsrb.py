@@ -32,10 +32,9 @@ def train(batch_size: int, epochs: int):
         num_workers=2
     )
 
-    # if not torch.cuda.is_available():
-    #     raise RuntimeError('GPU is not available.')
-    # device = torch.device("cuda:0")
-    device = torch.device('cpu')
+    if not torch.cuda.is_available():
+        raise RuntimeError('GPU is not available.')
+    device = torch.device("cuda:0")
     net = GTSRBCNN()
     net.to(device)
     summary(net, (3, 32, 32))
