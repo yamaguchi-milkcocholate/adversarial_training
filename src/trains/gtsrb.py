@@ -42,7 +42,7 @@ def train(batch_size: int, epochs: int):
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     for epoch in range(epochs):
-        running_loss = 0.0
+        train_loss = 0.0
         for i, (inputs, labels) in enumerate(train_loader, 0):
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -54,20 +54,24 @@ def train(batch_size: int, epochs: int):
             optimizer.step()
 
             # print statistics
-            running_loss += loss.item()
-        print('[{:d},] loss: {:.3f}'.format(epoch + 1, running_loss))
+            train_loss = loss.item()
+        print('[{:d}/{:d}] loss: {:.3f} test: {:.3f}'.format(
+            epoch + 1, epochs, train_loss / batch_size, test(test_loader=test_loader, model=net, device=device)))
     print('Finished Training')
+    print('Accuracy: {:.2f} %%'.format(test(test_loader=test_loader, model=net, device=device)))
+    ModelRepository.save(filename='GTSRB/model.p', model=net)
+    print(time() - start_at)
 
+
+def test(test_loader, model, device):
     correct = 0
     total = 0
     with torch.no_grad():
         for (images, labels) in test_loader:
             images = images.to(device)
             labels = labels.to(device)
-            outputs = net(images)
+            outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    print('Accuracy: {:.2f} %%'.format(100 * float(correct / total)))
-    ModelRepository.save(filename='GTSRB/model.p', model=net)
-    print(time() - start_at)
+    return 100 * float(correct / total)
