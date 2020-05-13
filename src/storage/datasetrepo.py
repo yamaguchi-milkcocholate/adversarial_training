@@ -19,6 +19,15 @@ class BaseRepository(ABC):
         else:
             raise FileNotFoundError()
 
+    @classmethod
+    def save_as_pickle(cls, filename, data):
+        path = os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/{0}.p'.format(filename))
+
+        if os.path.exists(path):
+            os.remove(path)
+        with open(path, 'wb') as f:
+            pickle.dump(data, f)
+
 
 class LISARepository(BaseRepository):
     DIR_NAME = 'datasets/LISA'
@@ -36,29 +45,32 @@ class GTSRBRepository(BaseRepository):
         return super().load(used_for=used_for, transformer=transformer)
 
     @classmethod
-    def load_from_pickle(cls) -> List[TransformableDataset]:
-        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME+'/train.p'), mode='rb') as f:
-            train = pickle.load(f)
-        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME+'/test.p'), mode='rb') as f:
+    def load_from_pickle(cls, is_jitter=True) -> List[np.ndarray]:
+        if is_jitter:
+            with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/jitter_train.p'), mode='rb') as f:
+                train = pickle.load(f)
+        else:
+            with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/train.p'), mode='rb') as f:
+                train = pickle.load(f)
+        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/test.p'), mode='rb') as f:
             test = pickle.load(f)
+        return train['features'], train['labels'], test['features'], test['labels']
 
-        x_train = train['features']
-        x_test = test['features']
+    @classmethod
+    def load_from_pickle_as_dataset(cls) -> List[TransformableDataset]:
+        x_train, y_train, x_test, y_test = cls.load_from_pickle()
         # Transform
         train_transform = transforms.Compose([
             transforms.ToTensor(),
-            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         test_transform = transforms.Compose([
             transforms.ToTensor(),
-            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         # Dataset
         train_dataset = TransformableDataset(
-            x_train, train['labels'].astype(dtype=np.int),
+            x_train, y_train.astype(dtype=np.int),
             transform=train_transform)
         test_dataset = TransformableDataset(
-            x_test, test['labels'].astype(dtype=np.int),
+            x_test, y_test['labels'].astype(dtype=np.int),
             transform=test_transform)
         return train_dataset, test_dataset
-
