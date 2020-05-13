@@ -76,6 +76,8 @@ class GTSRBRepository(BaseRepository):
         # test_dataset = TransformableDataset(
         #     x_test.astype(dtype=np.float), y_test.astype(dtype=np.int),
         #     transform=test_transform)
+        x_train = x_train.reshape((x_train.shape[0], x_train.shape[3], x_train.shape[1], x_train.shape[2]))
+        x_test = x_test.reshape((x_test.shape[0], x_test.shape[3], x_test.shape[1], x_test.shape[2]))
         train_dataset = TransformableDataset(
              torch.tensor(x_train, dtype=torch.float), torch.tensor(y_train, dtype=torch.uint8)
         )
