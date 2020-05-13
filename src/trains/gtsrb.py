@@ -13,7 +13,7 @@ from src.trains.models import GTSRBCNN
 
 def train(batch_size: int, epochs: int):
     start_at = time()
-    train_set, test_set = GTSRBRepository.load_from_pickle()
+    train_set, test_set = GTSRBRepository.load_from_pickle_as_dataset()
     print('Train Data Size:', str(len(train_set.data)))
     print('Test Data Size:', str(len(test_set.data)))
     classes = tuple(np.linspace(0, len(np.unique(train_set.target))-1, len(np.unique(train_set.target)), dtype=np.uint8))
