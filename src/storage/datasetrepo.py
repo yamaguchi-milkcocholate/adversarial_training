@@ -49,11 +49,13 @@ class GTSRBRepository(BaseRepository):
         if is_jitter:
             with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/jitter_train.p'), mode='rb') as f:
                 train = pickle.load(f)
+            with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/jitter_test.p'), mode='rb') as f:
+                test = pickle.load(f)
         else:
             with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/train.p'), mode='rb') as f:
                 train = pickle.load(f)
-        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/test.p'), mode='rb') as f:
-            test = pickle.load(f)
+            with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/test.p'), mode='rb') as f:
+                test = pickle.load(f)
         return train['features'], train['labels'], test['features'], test['labels']
 
     @classmethod

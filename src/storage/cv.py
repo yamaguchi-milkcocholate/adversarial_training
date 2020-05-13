@@ -88,8 +88,10 @@ def gen_transformed_data(X_train, y_train, n_each, ang_range, shear_range, trans
 def pre_precess_gtsrb(gen_size: int):
     x_train, y_train, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
     jx_train, jy_train = gen_transformed_data(x_train, y_train, gen_size, 40, 5, 5, 1)
-    new_x_train = np.concatenate([x_train, jx_train])
-    new_y_train = np.concatenate([y_train, jy_train])
+    rx_test = np.array([pre_process_image(x_test[i]) for i in range(len(x_test))])
     GTSRBRepository.save_as_pickle(filename='jitter_train', data={
-        'features': new_x_train, 'labels': new_y_train
+        'features': jx_train, 'labels': jy_train
+    })
+    GTSRBRepository.save_as_pickle(filename='jitter_test', data={
+        'features': rx_test, 'labels': y_test
     })
