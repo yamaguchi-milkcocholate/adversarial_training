@@ -85,9 +85,32 @@ def gen_transformed_data(X_train, y_train, n_each, ang_range, shear_range, trans
     return X_arr, Y_arr
 
 
+def gen_extra_data(X_train, y_train, n_each, ang_range, shear_range, trans_range, randomize_Var):
+    X_arr = []
+    Y_arr = []
+    n_train = len(X_train)
+    for i in range(n_train):
+        for i_n in range(n_each):
+            img_trf = transform_image(X_train[i], ang_range, shear_range, trans_range)
+            X_arr.append(img_trf)
+            Y_arr.append(y_train[i])
+
+    X_arr = np.array(X_arr, dtype=np.float32())
+    Y_arr = np.array(Y_arr, dtype=np.float32())
+
+    if randomize_Var == 1:
+        len_arr = np.arange(len(Y_arr))
+        np.random.shuffle(len_arr)
+        X_arr[len_arr] = X_arr
+        Y_arr[len_arr] = Y_arr
+
+    return X_arr, Y_arr
+
+
 def pre_precess_gtsrb(gen_size: int):
     x_train, y_train, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
-    jx_train, jy_train = gen_transformed_data(x_train, y_train, gen_size, 40, 5, 5, 1)
+    # jx_train, jy_train = gen_transformed_data(x_train, y_train, gen_size, 40, 5, 5, 1)
+    jx_train, jy_train = gen_extra_data(x_train, y_train, 5, 40, 5, 5, 1)
     rx_test = np.array([pre_process_image(x_test[i]) for i in range(len(x_test))])
     GTSRBRepository.save_as_pickle(filename='jitter_train', data={
         'features': jx_train, 'labels': jy_train
