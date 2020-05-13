@@ -11,7 +11,7 @@ from src.storage.datasetrepo import GTSRBRepository
 from src.trains.models import GTSRBCNN
 
 
-def train(batch_size: int, epochs: int):
+def train(batch_size: int, epochs: int, lr: float, wd: float):
     start_at = time()
     train_set, test_set = GTSRBRepository.load_from_pickle_as_dataset()
     print('Train Data Size:', str(len(train_set.data)))
@@ -39,7 +39,7 @@ def train(batch_size: int, epochs: int):
     net.to(device)
     summary(net, (3, 32, 32))
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-5)
+    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
 
     for epoch in range(epochs):
         running_loss = 0.0
