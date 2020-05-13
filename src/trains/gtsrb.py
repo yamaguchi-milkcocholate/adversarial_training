@@ -48,7 +48,7 @@ def train(batch_size: int, epochs: int):
             optimizer.zero_grad()
 
             # forward + backward + optimize
-            outputs = net(inputs.to(device))
+            outputs = net(inputs.to(device, dtype=torch.float))
             loss = criterion(outputs, labels.to(device))
             loss.backward()
             optimizer.step()
@@ -68,7 +68,7 @@ def test(test_loader, model, device):
     total = 0
     with torch.no_grad():
         for (images, labels) in test_loader:
-            images = images.to(device)
+            images = images.to(device, dtype=torch.float)
             labels = labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
