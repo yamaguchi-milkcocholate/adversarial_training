@@ -70,9 +70,9 @@ class GTSRBRepository(BaseRepository):
         ])
         # Dataset
         train_dataset = TransformableDataset(
-            x_train, y_train.astype(dtype=np.int),
+            x_train.astype(dtype=np.float), y_train.astype(dtype=np.int),
             transform=train_transform)
         test_dataset = TransformableDataset(
-            x_test, y_test.astype(dtype=np.int),
+            x_test.astype(dtype=np.float), y_test.astype(dtype=np.int),
             transform=test_transform)
         return train_dataset, test_dataset
