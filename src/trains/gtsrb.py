@@ -55,19 +55,24 @@ def train(batch_size: int, epochs: int):
 
             # print statistics
             running_loss += loss.item()
-        print('[{:d}/{:d}] loss: {:.3f} test: {:.3f}'.format(
-            epoch + 1, epochs, running_loss / len(train_loader), test(test_loader=test_loader, model=net, device=device)))
+        print('[{:d}/{:d}] loss: {:.3f} train acc: {:.3f} test acc: {:.3f}'.format(
+            epoch + 1,
+            epochs,
+            running_loss / len(train_loader),
+            acc(data_loader=train_loader, model=net, device=device),
+            acc(data_loader=test_loader, model=net, device=device))
+        )
     print('Finished Training')
-    print('Accuracy: {:.2f} %%'.format(test(test_loader=test_loader, model=net, device=device)))
+    print('Accuracy: {:.2f} %%'.format(acc(data_loader=test_loader, model=net, device=device)))
     ModelRepository.save(filename='GTSRB/model.p', model=net)
     print(time() - start_at)
 
 
-def test(test_loader, model, device):
+def acc(data_loader, model, device):
     correct = 0
     total = 0
     with torch.no_grad():
-        for (images, labels) in test_loader:
+        for (images, labels) in data_loader:
             images = images.to(device, dtype=torch.float)
             labels = labels.to(device)
             outputs = model(images)
