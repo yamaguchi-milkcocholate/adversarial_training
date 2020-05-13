@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List
+import torch
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from src.storage.datasets import TransformableDataset
@@ -62,17 +63,23 @@ class GTSRBRepository(BaseRepository):
     def load_from_pickle_as_dataset(cls) -> List[TransformableDataset]:
         x_train, y_train, x_test, y_test = cls.load_from_pickle()
         # Transform
-        train_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-        test_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        # train_transform = transforms.Compose([
+        #     transforms.ToTensor(),
+        # ])
+        # test_transform = transforms.Compose([
+        #     transforms.ToTensor(),
+        # ])
         # Dataset
+        # train_dataset = TransformableDataset(
+        #     x_train.astype(dtype=np.float), y_train.astype(dtype=np.int),
+        #     transform=train_transform)
+        # test_dataset = TransformableDataset(
+        #     x_test.astype(dtype=np.float), y_test.astype(dtype=np.int),
+        #     transform=test_transform)
         train_dataset = TransformableDataset(
-            x_train.astype(dtype=np.float), y_train.astype(dtype=np.int),
-            transform=train_transform)
+             torch.tensor(x_train, dtype=torch.float), torch.tensor(y_train, dtype=torch.uint8)
+        )
         test_dataset = TransformableDataset(
-            x_test.astype(dtype=np.float), y_test.astype(dtype=np.int),
-            transform=test_transform)
+            torch.tensor(x_test, dtype=torch.float), torch.tensor(y_test, dtype=torch.uint8)
+        )
         return train_dataset, test_dataset
