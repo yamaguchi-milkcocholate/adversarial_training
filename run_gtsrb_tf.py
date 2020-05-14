@@ -385,7 +385,7 @@ if __name__ == '__main__':
                       labels_true_cls: y_test,
                       keep_prob: 1.0}
     session = tf.compat.v1.Session()
-    session.run(tf.compat.v1.local_variables_initializer())
+    session.run(tf.compat.v1.global_variables_initializer())
     print_accuracy()
 
     val_acc_list = []
