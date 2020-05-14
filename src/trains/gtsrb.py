@@ -40,7 +40,7 @@ def train(batch_size: int, epochs: int, lr: float, wd: float):
     summary(net, (3, 32, 32))
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=wd)
-
+    net.train()
     for epoch in range(epochs):
         running_loss = 0.0
         for i, (inputs, labels) in enumerate(train_loader, 0):
@@ -55,7 +55,6 @@ def train(batch_size: int, epochs: int, lr: float, wd: float):
 
             # print statistics
             running_loss += loss.item()
-        net.eval()
         print('[{:d}/{:d}] loss: {:.3f} train acc: {:.3f} test acc: {:.3f}'.format(
             epoch + 1,
             epochs,
@@ -63,7 +62,6 @@ def train(batch_size: int, epochs: int, lr: float, wd: float):
             acc(data_loader=train_loader, model=net, device=device),
             acc(data_loader=test_loader, model=net, device=device))
         )
-        net.train()
     print('Finished Training')
     net.eval()
     print('Accuracy: {:.2f} %%'.format(acc(data_loader=test_loader, model=net, device=device)))
