@@ -120,7 +120,9 @@ def random_batch():
 
 
 def get_weights(shape):
-    return tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+    return tf.Variable(tf.random.truncated_normal(shape, stddev=0.05))
+
+
 def get_biases(length):
     return tf.Variable(tf.constant(0.05, shape=[length]))
 
@@ -134,13 +136,13 @@ def conv_layer(input,
     weights = get_weights(shape)
     biases = get_biases(num_filters)
     layer = tf.nn.conv2d(input=input,
-                         filter=weights,
+                         filters=weights,
                          strides=[1, 1, 1, 1],
                          padding='SAME')
     layer += biases
     if use_pooling:
         layer = tf.nn.max_pool(
-            value=layer,
+            input=layer,
             ksize=[1, 2, 2, 1],
             strides=[1, 2, 2, 1],
             padding='SAME')
@@ -203,7 +205,7 @@ def optimize(num_iterations):
                 best_validation_accuracy = acc_valid
                 last_improvement = total_iterations
                 improved_str = '*'
-                saver = tf.train.Saver()
+                saver = tf.compat.v1.train.Saver()
                 saver.save(sess=session, save_path='model_best_batch')
             else:
                 improved_str = ''
@@ -217,7 +219,7 @@ def optimize(num_iterations):
                 msg = "# {0:>6}, Train Acc.: {1:>6.1%}, Val Acc.: {2:>6.1%}, Test Acc.: {3:>6.1%}"
                 acc_test = session.run(accuracy, feed_dict=feed_dict_test)
                 if best_test_accuracy < acc_test:
-                    saver = tf.train.Saver()
+                    saver = tf.compat.v1.train.Saver()
                     saver.save(sess=session, save_path='model_best_test')
                     best_test_accuracy = acc_test
                 # Print it.
@@ -232,6 +234,7 @@ def print_accuracy():
 if __name__ == '__main__':
     from tensorflow.python.client import device_lib
     print(device_lib.list_local_devices())
+    tf.compat.v1.disable_eager_execution()
     training_file = 'src/storage/datasets/GTSRB/train.p'
     testing_file = 'src/storage/datasets/GTSRB/test.p'
 
@@ -255,9 +258,9 @@ if __name__ == '__main__':
     num_channels = 3
     Image_train_GS_rot_1 = Image_train_GS_rot
     image_GS_test_1 = image_GS_test
-    features = tf.placeholder(tf.float32, shape=[None, img_size, img_size, num_channels], name='features')
-    labels_true = tf.placeholder(tf.float32, shape=[None, n_class], name='y_true')
-    labels_true_cls = tf.argmax(labels_true, dimension=1)
+    features = tf.compat.v1.placeholder(tf.float32, shape=[None, img_size, img_size, num_channels], name='features')
+    labels_true = tf.compat.v1.placeholder(tf.float32, shape=[None, n_class], name='y_true')
+    labels_true_cls = tf.argmax(labels_true, axis=1)
 
     ## Convlayer 0
     filter_size0 = 1
@@ -286,7 +289,7 @@ if __name__ == '__main__':
     fc_size2 = 1024
     ## Dropout
     # drop_prob = 0.5
-    keep_prob = tf.placeholder(tf.float32)
+    keep_prob = tf.compat.v1.placeholder(tf.float32)
 
     layer_conv0, weights_conv0 = \
         conv_layer(input=features,
@@ -362,7 +365,7 @@ if __name__ == '__main__':
                                       use_relu=False)
 
     labels_pred = tf.nn.softmax(fc_layer3)
-    labels_pred_cls = tf.argmax(labels_pred, dimension=1)
+    labels_pred_cls = tf.argmax(labels_pred, axis=1)
 
     regularizers = (tf.nn.l2_loss(weights_conv0)
                     + tf.nn.l2_loss(weights_conv1) + tf.nn.l2_loss(weights_conv2)
@@ -374,15 +377,15 @@ if __name__ == '__main__':
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=fc_layer3,
                                                             labels=labels_true)
     cost = tf.reduce_mean(cross_entropy) + 1e-5 * regularizers
-    optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(cost)
+    optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=1e-3).minimize(cost)
     correct_prediction = tf.equal(labels_pred_cls, labels_true_cls)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     feed_dict_test = {features: image_GS_test_1,
                       labels_true: labels_test,
                       labels_true_cls: y_test,
                       keep_prob: 1.0}
-    session = tf.Session()
-    session.run(tf.initialize_all_variables())
+    session = tf.compat.v1.Session()
+    session.run(tf.compat.v1.initialize_all_variables())
     print_accuracy()
 
     val_acc_list = []
