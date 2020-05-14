@@ -385,13 +385,13 @@ if __name__ == '__main__':
                       labels_true_cls: y_test,
                       keep_prob: 1.0}
     session = tf.compat.v1.Session()
-    session.run(tf.compat.v1.initialize_all_variables())
+    session.run(tf.compat.v1.local_variables_initializer())
     print_accuracy()
 
     val_acc_list = []
     batch_acc_list = []
     train_acc_list = []
-    batch_size = 512
+    batch_size = 5
 
     start_time = time.time()
     total_iterations = 0
