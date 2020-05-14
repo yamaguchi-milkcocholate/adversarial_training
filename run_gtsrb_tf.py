@@ -195,7 +195,7 @@ def optimize(num_iterations):
                            keep_prob: 0.5}
         feed_dict_valid = {features: features_batch,
                            labels_true: labels_true_batch,
-                           keep_prob: 0.5}
+                           keep_prob: 1.0}
         session.run(optimizer, feed_dict=feed_dict_batch)
 
         if (total_iterations % 200 == 0) or (i == (num_iter - 1)):
