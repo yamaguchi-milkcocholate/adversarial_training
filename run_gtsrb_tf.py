@@ -434,8 +434,26 @@ if __name__ == '__main__':
                                                                            ang_rot, trans_rot, shear_rot, 1)
         print('Optimization Loop # ' + str(i_train))
         Image_train_GS_rot_1 = Image_train_GS_rot
+        print('train data:', Image_train_GS_rot_1.shape)
         # np.reshape(Image_train_GS_rot,(-1,32,32,1))
         #
+        total_parameters = 0
+        parameters_string = ""
+
+        for variable in tf.compat.v1.trainable_variables():
+
+            shape = variable.get_shape()
+            variable_parameters = 1
+            for dim in shape:
+                variable_parameters *= dim
+            total_parameters += variable_parameters
+            if len(shape) == 1:
+                parameters_string += ("%s %d \n" % (variable.name, variable_parameters))
+            else:
+                parameters_string += ("%s %s=%d \n" % (variable.name, str(shape), variable_parameters))
+
+        print(parameters_string)
+        print("Total %d variables, %s params" % (len(tf.compat.v1.trainable_variables()), "{:,}".format(total_parameters)))
         optimize(n_opt)
         # print_accuracy()
 

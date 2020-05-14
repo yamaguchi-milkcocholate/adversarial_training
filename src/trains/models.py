@@ -42,8 +42,9 @@ class GTSRBCNN(nn.Module):
 
         self.fc1 = nn.Linear(32 * 16 * 16 + 64 * 8 * 8 + 128 * 4 * 4, 1024)
         self.dropout4 = nn.Dropout2d()
-        self.fc2 = nn.Linear(1024, 43)
+        self.fc2 = nn.Linear(1024, 1024)
         self.dropout5 = nn.Dropout2d()
+        self.fc3 = nn.Linear(1024, 43)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -65,4 +66,5 @@ class GTSRBCNN(nn.Module):
         x = self.dropout4(x)
         x = self.fc2(x)
         x = self.dropout5(x)
+        x = self.fc3(x)
         return x
