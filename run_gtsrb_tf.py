@@ -215,7 +215,7 @@ def optimize(num_iterations):
                 break
 
             # Message for printing.
-            if (total_iterations % 5000 == 0) or (i == (num_iter - 1)):
+            if (total_iterations % 100 == 0) or (i == (num_iter - 1)):
                 msg = "# {0:>6}, Train Acc.: {1:>6.1%}, Val Acc.: {2:>6.1%}, Test Acc.: {3:>6.1%}"
                 acc_test = session.run(accuracy, feed_dict=feed_dict_test)
                 if best_test_accuracy < acc_test:
