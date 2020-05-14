@@ -198,7 +198,8 @@ def optimize(num_iterations):
         if (total_iterations % 200 == 0) or (i == (num_iter - 1)):
             # Calculate the accuracy on the training-set.
             acc_batch = session.run(accuracy, feed_dict=feed_dict_batch)
-            acc_valid = session.run(accuracy, feed_dict=feed_dict_valid)
+            # acc_valid = session.run(accuracy, feed_dict=feed_dict_valid)
+            acc_valid = session.run(accuracy, feed_dict=feed_dict_batch)
             val_acc_list.append(acc_valid)
             batch_acc_list.append(acc_batch)
             if acc_valid > best_validation_accuracy:
@@ -217,7 +218,8 @@ def optimize(num_iterations):
             # Message for printing.
             if (total_iterations % 100 == 0) or (i == (num_iter - 1)):
                 msg = "# {0:>6}, Train Acc.: {1:>6.1%}, Val Acc.: {2:>6.1%}, Test Acc.: {3:>6.1%}"
-                acc_test = session.run(accuracy, feed_dict=feed_dict_test)
+                # acc_test = session.run(accuracy, feed_dict=feed_dict_test)
+                acc_test = session.run(accuracy, feed_dict=feed_dict_batch)
                 if best_test_accuracy < acc_test:
                     saver = tf.compat.v1.train.Saver()
                     saver.save(sess=session, save_path='model_best_test')
@@ -391,7 +393,7 @@ if __name__ == '__main__':
     val_acc_list = []
     batch_acc_list = []
     train_acc_list = []
-    batch_size = 5
+    batch_size = 512
 
     start_time = time.time()
     total_iterations = 0
@@ -423,7 +425,6 @@ if __name__ == '__main__':
         labels_valid_SS = OHE_labels(y_valid_SS, 43)
         image_GS_valid = np.array([pre_process_image(X_valid_SS[i]) for i in range(len(X_valid_SS))],
                                   dtype=np.float32)
-        # image_GS_valid = np.reshape(image_GS_valid,(-1,32,32,1))
 
         feed_dict_valid = {features: image_GS_valid,
                            labels_true: labels_valid_SS,
