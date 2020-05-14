@@ -193,9 +193,6 @@ def optimize(num_iterations):
         feed_dict_batch = {features: features_batch,
                            labels_true: labels_true_batch,
                            keep_prob: 0.5}
-        feed_dict_valid = {features: features_batch,
-                           labels_true: labels_true_batch,
-                           keep_prob: 1.0}
         session.run(optimizer, feed_dict=feed_dict_batch)
 
         if (total_iterations % 200 == 0) or (i == (num_iter - 1)):
@@ -385,7 +382,7 @@ if __name__ == '__main__':
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     feed_dict_test = {features: image_GS_test_1,
                       labels_true: labels_test,
-                      keep_prob: 1.0}
+                      keep_prob: 0.5}
     session = tf.compat.v1.Session()
     session.run(tf.compat.v1.global_variables_initializer())
     print_accuracy()
@@ -428,7 +425,7 @@ if __name__ == '__main__':
 
         feed_dict_valid = {features: image_GS_valid,
                            labels_true: labels_valid_SS,
-                           keep_prob: 1.0}
+                           keep_prob: 0.5}
 
         Image_train_GS_rot, y_train_rot, labels_train_rot = gen_extra_data(X_train_SS, y_train_SS, 43, 5,
                                                                            ang_rot, trans_rot, shear_rot, 1)
