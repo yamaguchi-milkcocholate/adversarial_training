@@ -39,7 +39,7 @@ def train(batch_size: int, epochs: int, lr: float, wd: float):
     net.to(device)
     summary(net, (3, 32, 32))
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+    optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=wd)
 
     for epoch in range(epochs):
         running_loss = 0.0

@@ -110,7 +110,7 @@ def gen_extra_data(X_train, y_train, n_each, ang_range, shear_range, trans_range
 def pre_precess_gtsrb(gen_size: int):
     x_train, y_train, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
     # jx_train, jy_train = gen_transformed_data(x_train, y_train, gen_size, 40, 5, 5, 1)
-    jx_train, jy_train = gen_extra_data(x_train, y_train, 5, 40, 5, 5, 1)
+    jx_train, jy_train = gen_extra_data(x_train, y_train, 5, 10 * 0.9, 2 * 0.9, 2 * 0.9, 1)
     rx_test = np.array([pre_process_image(x_test[i]) for i in range(len(x_test))])
     GTSRBRepository.save_as_pickle(filename='jitter_train', data={
         'features': jx_train, 'labels': jy_train
