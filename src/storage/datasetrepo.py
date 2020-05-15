@@ -60,28 +60,28 @@ class GTSRBRepository(BaseRepository):
         return train['features'], train['labels'], test['features'], test['labels']
 
     @classmethod
+    def load_from_pickle_tf(cls) -> List[np.ndarray]:
+        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/tf_train.p'), mode='rb') as f:
+            train = pickle.load(f)
+        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/tf_valid.p'), mode='rb') as f:
+            valid = pickle.load(f)
+        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/tf_test.p'), mode='rb') as f:
+            test = pickle.load(f)
+        return train['features'], train['labels'], valid['features'], valid['labels'], test['features'], test['labels']
+
+    @classmethod
     def load_from_pickle_as_dataset(cls) -> List[TransformableDataset]:
-        x_train, y_train, x_test, y_test = cls.load_from_pickle()
-        # Transform
-        # train_transform = transforms.Compose([
-        #     transforms.ToTensor(),
-        # ])
-        # test_transform = transforms.Compose([
-        #     transforms.ToTensor(),
-        # ])
-        # Dataset
-        # train_dataset = TransformableDataset(
-        #     x_train.astype(dtype=np.float), y_train.astype(dtype=np.int),
-        #     transform=train_transform)
-        # test_dataset = TransformableDataset(
-        #     x_test.astype(dtype=np.float), y_test.astype(dtype=np.int),
-        #     transform=test_transform)
+        x_train, y_train, x_valid, y_valid, x_test, y_test = cls.load_from_pickle_tf()
         x_train = x_train.reshape((x_train.shape[0], x_train.shape[3], x_train.shape[1], x_train.shape[2]))
+        x_valid = x_valid.reshape((x_valid.shape[0], x_valid.shape[3], x_valid.shape[1], x_valid.shape[2]))
         x_test = x_test.reshape((x_test.shape[0], x_test.shape[3], x_test.shape[1], x_test.shape[2]))
         train_dataset = TransformableDataset(
              torch.tensor(x_train, dtype=torch.float), torch.tensor(y_train, dtype=torch.long)
         )
+        valid_dataset = TransformableDataset(
+            torch.tensor(x_valid, dtype=torch.float), torch.tensor(y_valid, dtype=torch.long)
+        )
         test_dataset = TransformableDataset(
             torch.tensor(x_test, dtype=torch.float), torch.tensor(y_test, dtype=torch.long)
         )
-        return train_dataset, test_dataset
+        return train_dataset, valid_dataset, test_dataset
