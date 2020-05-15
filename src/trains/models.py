@@ -73,15 +73,15 @@ class GTSRBCNN(nn.Module):
         return x
 
     def _init_weight(self):
-        torch.nn.init.normal_(self.conv0.weight, std=0.5)
-        torch.nn.init.normal_(self.conv1.weight, std=0.5)
-        torch.nn.init.normal_(self.conv2.weight, std=0.5)
-        torch.nn.init.normal_(self.conv3.weight, std=0.5)
-        torch.nn.init.normal_(self.conv4.weight, std=0.5)
-        torch.nn.init.normal_(self.conv5.weight, std=0.5)
-        torch.nn.init.normal_(self.conv6.weight, std=0.5)
-        torch.nn.init.normal_(self.fc1.weight, std=0.5)
-        torch.nn.init.normal_(self.fc2.weight, std=0.5)
-        torch.nn.init.normal_(self.fc3.weight, std=0.5)
+        torch.nn.init.kaiming_normal_(self.conv0.weight)
+        torch.nn.init.kaiming_normal_(self.conv1.weight)
+        torch.nn.init.kaiming_normal_(self.conv2.weight)
+        torch.nn.init.kaiming_normal_(self.conv3.weight)
+        torch.nn.init.kaiming_normal_(self.conv4.weight)
+        torch.nn.init.kaiming_normal_(self.conv5.weight)
+        torch.nn.init.kaiming_normal_(self.conv6.weight)
+        torch.nn.init.kaiming_normal_(self.fc1.weight)
+        torch.nn.init.kaiming_normal_(self.fc2.weight)
+        torch.nn.init.kaiming_normal_(self.fc3.weight)
 
 
