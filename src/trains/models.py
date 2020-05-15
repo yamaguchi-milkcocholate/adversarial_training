@@ -46,6 +46,7 @@ class GTSRBCNN(nn.Module):
         self.fc2 = nn.Linear(1024, 1024)
         self.dropout5 = nn.Dropout2d()
         self.fc3 = nn.Linear(1024, 43)
+        self._init_weight()
 
     def forward(self, x):
         x = F.relu(self.conv0(x))
@@ -70,3 +71,17 @@ class GTSRBCNN(nn.Module):
         x = self.dropout5(x)
         x = self.fc3(x)
         return x
+
+    def _init_weight(self):
+        torch.nn.init.normal_(self.conv0.weight, std=0.5)
+        torch.nn.init.normal_(self.conv1.weight, std=0.5)
+        torch.nn.init.normal_(self.conv2.weight, std=0.5)
+        torch.nn.init.normal_(self.conv3.weight, std=0.5)
+        torch.nn.init.normal_(self.conv4.weight, std=0.5)
+        torch.nn.init.normal_(self.conv5.weight, std=0.5)
+        torch.nn.init.normal_(self.conv6.weight, std=0.5)
+        torch.nn.init.normal_(self.fc1.weight, std=0.5)
+        torch.nn.init.normal_(self.fc2.weight, std=0.5)
+        torch.nn.init.normal_(self.fc3.weight, std=0.5)
+
+
