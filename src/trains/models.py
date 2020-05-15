@@ -25,27 +25,27 @@ class GTSRBCNN(nn.Module):
 
     def __init__(self):
         super(GTSRBCNN, self).__init__()
-        self.conv0 = nn.Conv2d(in_channels=3, out_channels=3, kernel_size=1, stride=1, padding=0, bias=False)
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=2, bias=False)
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, stride=1, padding=2, bias=False)
+        self.conv0 = nn.Conv2d(in_channels=3, out_channels=3, kernel_size=1, stride=1, padding=0)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=2)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, stride=1, padding=2)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.dropout1 = nn.Dropout2d()
 
-        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, stride=1, padding=2, bias=False)
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5, stride=1, padding=2, bias=False)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, stride=1, padding=2)
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5, stride=1, padding=2)
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.dropout2 = nn.Dropout2d()
 
-        self.conv5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=2, bias=False)
-        self.conv6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=5, stride=1, padding=2, bias=False)
+        self.conv5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=2)
+        self.conv6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=5, stride=1, padding=2)
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.dropout3 = nn.Dropout2d()
 
-        self.fc1 = nn.Linear(32 * 16 * 16 + 64 * 8 * 8 + 128 * 4 * 4, 1024, bias=False)
+        self.fc1 = nn.Linear(32 * 16 * 16 + 64 * 8 * 8 + 128 * 4 * 4, 1024)
         self.dropout4 = nn.Dropout2d()
-        self.fc2 = nn.Linear(1024, 1024, bias=False)
+        self.fc2 = nn.Linear(1024, 1024)
         self.dropout5 = nn.Dropout2d()
-        self.fc3 = nn.Linear(1024, 43, bias=False)
+        self.fc3 = nn.Linear(1024, 43)
 
     def forward(self, x):
         x = F.relu(self.conv0(x))
