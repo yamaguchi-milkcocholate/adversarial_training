@@ -252,11 +252,10 @@ if __name__ == '__main__':
 
     image_GS_test = np.array([pre_process_image(X_test[i]) for i in range(len(X_test))],
                              dtype=np.float32)
-    Image_train_GS_rot, y_train_rot, labels_train_rot = gen_transformed_data(
-        X_train, y_train, n_class, 10, 30, 5, 5, 1)
+    # Image_train_GS_rot, y_train_rot, labels_train_rot = gen_transformed_data(
+    #     X_train, y_train, n_class, 10, 30, 5, 5, 1)
     img_size = 32
     num_channels = 3
-    Image_train_GS_rot_1 = Image_train_GS_rot
     image_GS_test_1 = image_GS_test
     features = tf.compat.v1.placeholder(tf.float32, shape=[None, img_size, img_size, num_channels], name='features')
     labels_true = tf.compat.v1.placeholder(tf.float32, shape=[None, n_class], name='y_true')
@@ -394,65 +393,54 @@ if __name__ == '__main__':
 
     start_time = time.time()
     total_iterations = 0
-    require_improvement = 10000
-    ang_rot = 10
-    trans_rot = 2
-    shear_rot = 2
-    n_opt = 40000
     best_test_accuracy = 0.0
 
-    for i_train in range(1):
-        best_validation_accuracy = 0.0
-        last_improvement = 0
+    best_validation_accuracy = 0.0
+    last_improvement = 0
 
-        # Image_train_GS_rot,y_train_rot,labels_train_rot = gen_transformed_data(X_train,y_train,43,5000,30,5,5,1)
+    ang_rot = 10 * 0.9 ** 1
+    trans_rot = 2 * 0.9 ** 1
+    shear_rot = 2 * 0.9 ** 1
+    require_improvement = 5000
+    n_opt = 10000
 
-        if i_train > -1:
-            ang_rot = 10 * 0.9 ** (i_train)
-            trans_rot = 2 * 0.9 ** (i_train)
-            shear_rot = 2 * 0.9 ** (i_train)
-            require_improvement = 5000
-            n_opt = 10000
+    X_train_SS, X_valid_SS, y_train_SS, y_valid_SS = \
+        train_test_split(X_train,
+                         y_train,
+                         test_size=0.1,
+                         random_state=22)
+    labels_valid_SS = OHE_labels(y_valid_SS, 43)
+    image_GS_valid = np.array([pre_process_image(X_valid_SS[i]) for i in range(len(X_valid_SS))],
+                              dtype=np.float32)
 
-        X_train_SS, X_valid_SS, y_train_SS, y_valid_SS = \
-            train_test_split(X_train,
-                             y_train,
-                             test_size=0.1,
-                             random_state=22)
-        labels_valid_SS = OHE_labels(y_valid_SS, 43)
-        image_GS_valid = np.array([pre_process_image(X_valid_SS[i]) for i in range(len(X_valid_SS))],
-                                  dtype=np.float32)
+    feed_dict_valid = {features: image_GS_valid,
+                       labels_true: labels_valid_SS,
+                       keep_prob: 0.5}
 
-        feed_dict_valid = {features: image_GS_valid,
-                           labels_true: labels_valid_SS,
-                           keep_prob: 0.5}
+    Image_train_GS_rot, y_train_rot, labels_train_rot = gen_extra_data(X_train_SS, y_train_SS, 43, 5,
+                                                                       ang_rot, trans_rot, shear_rot, 1)
+    print('Optimization Loop')
+    Image_train_GS_rot_1 = Image_train_GS_rot
+    print('train data:', Image_train_GS_rot_1.shape)
+    total_parameters = 0
+    parameters_string = ""
 
-        Image_train_GS_rot, y_train_rot, labels_train_rot = gen_extra_data(X_train_SS, y_train_SS, 43, 5,
-                                                                           ang_rot, trans_rot, shear_rot, 1)
-        print('Optimization Loop # ' + str(i_train))
-        Image_train_GS_rot_1 = Image_train_GS_rot
-        print('train data:', Image_train_GS_rot_1.shape)
-        # np.reshape(Image_train_GS_rot,(-1,32,32,1))
-        #
-        total_parameters = 0
-        parameters_string = ""
+    for variable in tf.compat.v1.trainable_variables():
 
-        for variable in tf.compat.v1.trainable_variables():
+        shape = variable.get_shape()
+        variable_parameters = 1
+        for dim in shape:
+            variable_parameters *= dim
+        total_parameters += variable_parameters
+        if len(shape) == 1:
+            parameters_string += ("%s %d \n" % (variable.name, variable_parameters))
+        else:
+            parameters_string += ("%s %s=%d \n" % (variable.name, str(shape), variable_parameters))
 
-            shape = variable.get_shape()
-            variable_parameters = 1
-            for dim in shape:
-                variable_parameters *= dim
-            total_parameters += variable_parameters
-            if len(shape) == 1:
-                parameters_string += ("%s %d \n" % (variable.name, variable_parameters))
-            else:
-                parameters_string += ("%s %s=%d \n" % (variable.name, str(shape), variable_parameters))
-
-        print(parameters_string)
-        print("Total %d variables, %s params" % (len(tf.compat.v1.trainable_variables()), "{:,}".format(total_parameters)))
-        optimize(n_opt)
-        # print_accuracy()
+    print(parameters_string)
+    print("Total %d variables, %s params" % (len(tf.compat.v1.trainable_variables()), "{:,}".format(total_parameters)))
+    optimize(n_opt)
+    # print_accuracy()
 
     end_time = time.time()
 
