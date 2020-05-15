@@ -46,7 +46,7 @@ class GTSRBCNN(nn.Module):
         self.fc2 = nn.Linear(1024, 1024)
         self.dropout5 = nn.Dropout2d()
         self.fc3 = nn.Linear(1024, 43)
-        self._init_weight()
+        # self._init_weight()
 
     def forward(self, x):
         x = F.relu(self.conv0(x))
