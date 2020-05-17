@@ -74,7 +74,7 @@ def train(batch_size: int, epochs: int, lr: float, wd: float):
     print('Finished Training')
     net.eval()
     print('Accuracy: {:.2f} %%'.format(acc(data_loader=test_loader, model=net, device=device, is_for_all=True)))
-    ModelRepository.save(filename='GTSRB/model.p', model=net)
+    ModelRepository.save(filename='GTSRB/model', model=net)
     print(time() - start_at)
 
 

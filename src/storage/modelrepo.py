@@ -1,14 +1,16 @@
 import pickle
 import os
+from torch.nn import Module
+import torch
 
 
 class ModelRepository:
 
     @classmethod
     def save(cls, filename, model):
-        path = os.path.join(os.path.dirname(__file__)+'/models', filename)
+        torch.save(model, os.path.dirname(__file__)+'/models', filename)
 
-        if os.path.exists(path):
-            os.remove(path)
-        with open(os.path.join(os.path.dirname(__file__)+'/models', filename), 'wb') as f:
-            pickle.dump(model, f)
+    @classmethod
+    def load(cls, filename) -> Module:
+        with open(os.path.join(os.path.dirname(__file__)+'/models', filename), 'rb') as f:
+            pickle.load(f)
