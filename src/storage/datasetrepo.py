@@ -8,6 +8,7 @@ import os
 from abc import ABC
 import pickle
 import numpy as np
+from PIL import Image
 
 
 class BaseRepository(ABC):
@@ -85,3 +86,11 @@ class GTSRBRepository(BaseRepository):
             torch.tensor(x_test, dtype=torch.float), torch.tensor(y_test, dtype=torch.long)
         )
         return train_dataset, valid_dataset, test_dataset
+
+    @classmethod
+    def load_from_images(cls, dir_name: str) -> np.ndarray:
+        dir_name = os.path.join(os.path.dirname(__file__), cls.DIR_NAME+'/'+dir_name)
+        images = list()
+        for img_file in sorted(os.listdir(dir_name)):
+            images.append(np.array(Image.open(os.path.join(dir_name, img_file))))
+        return np.array(images)
