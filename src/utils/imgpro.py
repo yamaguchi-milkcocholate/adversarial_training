@@ -9,6 +9,11 @@ def scale_gtsrb(images: np.ndarray):
     return images.astype(np.float32)
 
 
+def rescale_gtsrb(images: np.ndarray):
+    images = (images + 0.5) * 255.
+    return images.astype(np.uint8)
+
+
 def resize(img: torch.Tensor, size: tuple) -> torch.Tensor:
     img = torch.nn.functional.interpolate(img, size, mode='nearest')
     return img
