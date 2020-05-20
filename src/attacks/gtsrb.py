@@ -5,6 +5,8 @@ from src.trains.models import GTSRBCNN
 from src.utils.imgpro import *
 from src.utils.stats import success_rate
 from src.attacks.criterion import PhysicalRobustCriterion
+from torchvision.transforms import ToTensor, ToPILImage
+from torch.nn.functional import avg_pool2d
 
 
 def attack(iteration: int):
@@ -14,12 +16,15 @@ def attack(iteration: int):
     model.eval()
     true_class = 14
     target_class = 5
-    input_size = (32, 32)
+    input_size = (3, 32, 32)
+    resize_kernel_size = (8, 8)
+    resize_stride = 8
     inputs, mask = _prepare_inputs()
     labels = torch.tensor(np.array([target_class] * len(inputs)), dtype=torch.long)
     true_labels = torch.tensor(np.array([true_class] * len(inputs)), dtype=torch.long)
     # Todo: initial noise is 0.0 which is different from the original code.
     noise = torch.tensor(np.random.normal(0.0, 1.0, inputs.shape[1:])*0.0, dtype=torch.float32, requires_grad=True)
+    # noise = np.zeros_like(mask)
 
     criterion = PhysicalRobustCriterion()
     optimizer = torch.optim.Adam([noise])  # Todo: lr & eps are different
@@ -27,7 +32,9 @@ def attack(iteration: int):
     for i in range(iteration):
         optimizer.zero_grad()
         noisy_inputs = add_noise(inputs=inputs, noise=noise, mask=mask)
-        outputs = model(resize(img=noisy_inputs, size=input_size))
+        noisy_inputs = resize_as_tensor_with_rescale_and_reshape(img=noisy_inputs, size=input_size)
+        # noisy_inputs = avg_pool2d(noisy_inputs, resize_kernel_size, resize_stride)
+        outputs = model(noisy_inputs)
         loss = criterion(outputs, labels, noise=noise)
         loss.backward()
         optimizer.step()
@@ -43,14 +50,12 @@ def attack(iteration: int):
 
 def _prepare_inputs() -> List[torch.Tensor]:
     ori_data = GTSRBRepository.load_from_images(dir_name='victim-set')
+    ori_data = scale_gtsrb(images=ori_data)
     ori_data = ori_data.reshape((ori_data.shape[0], ori_data.shape[3], ori_data.shape[1], ori_data.shape[2]))
+    ori_data_ts = torch.tensor(ori_data, dtype=torch.float, requires_grad=True)
     mask = GTSRBRepository.load_from_images(dir_name='masks')[0]
     mask = mask.reshape(mask.shape[2], mask.shape[0], mask.shape[1])
-
-    ori_data = scale_gtsrb(images=ori_data)
     mask = mask.astype(np.float32)
-
-    ori_data_ts = torch.tensor(ori_data, dtype=torch.float, requires_grad=True)
     mask_ts = torch.tensor(mask, dtype=torch.float, requires_grad=True)
     return ori_data_ts, mask_ts
 

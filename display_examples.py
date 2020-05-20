@@ -1,6 +1,7 @@
 import matplotlib.pylab as plt
 from src.storage.datasetrepo import GTSRBRepository
 from src.utils.imgpro import *
+import torch
 
 _, _, _, _, x_test, y_test = GTSRBRepository.load_from_pickle_tf()
 # _, _, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
@@ -37,12 +38,14 @@ row = int(len(x_test) / col) if len(x_test) % col == 0 else int(len(x_test) / co
 _plot_stop(data=x_test, col=col, row=row)
 
 x_stop = GTSRBRepository.load_from_images(dir_name='victim-set')
-row = int(len(x_stop) / col) if len(x_stop) % col == 0 else int(len(x_stop) / col) + 1
+row = 4
+
+# Original Images
 _plot_stop(data=x_stop, col=col, row=row)
 
+# Input Data
 x_stop = scale_gtsrb(images=resize(img=x_stop, size=(32, 32)))
 x_stop += 0.5
-row = int(len(x_stop) / col) if len(x_stop) % col == 0 else int(len(x_stop) / col) + 1
 _plot_stop(data=x_stop, col=col, row=row)
 
 plt.show()
