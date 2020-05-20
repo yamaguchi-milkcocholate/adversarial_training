@@ -1,9 +1,9 @@
-import torch
 from typing import List
 from src.storage.modelrepo import ModelRepository
 from src.storage.datasetrepo import GTSRBRepository
 from src.trains.models import GTSRBCNN
 from src.utils.imgpro import *
+from src.utils.stats import success_rate
 from src.attacks.criterion import PhysicalRobustCriterion
 
 
@@ -53,13 +53,6 @@ def _prepare_inputs() -> List[torch.Tensor]:
     ori_data_ts = torch.tensor(ori_data, dtype=torch.float, requires_grad=True)
     mask_ts = torch.tensor(mask, dtype=torch.float, requires_grad=True)
     return ori_data_ts, mask_ts
-
-
-def success_rate(outputs: torch.Tensor, labels: torch.Tensor) -> float:
-    _, prediction = torch.max(outputs.data, 1)
-    total = labels.size(0)
-    correct = (prediction == labels).sum().item()
-    return 100 * float(correct / total)
 
 
 if __name__ == '__main__':
