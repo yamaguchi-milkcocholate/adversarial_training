@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
 import torch
+from PIL import Image
 
 
 def scale_gtsrb(images: np.ndarray):
@@ -14,9 +15,15 @@ def rescale_gtsrb(images: np.ndarray):
     return images.astype(np.uint8)
 
 
-def resize(img: torch.Tensor, size: tuple) -> torch.Tensor:
-    img = torch.nn.functional.interpolate(img, size, mode='nearest')
-    return img
+def resize(img: np.ndarray, size: tuple) -> np.ndarray:
+    img = img.astype(np.uint8)
+    resized = list()
+    for i in range(len(img)):
+        i_img = Image.fromarray(img[i])
+        i_img = i_img.resize(size=size)
+        resized.append(np.asarray(i_img))
+
+    return np.array(resized)
 
 
 def add_noise(inputs: torch.Tensor, noise: torch.Tensor, mask: torch) -> torch.Tensor:
