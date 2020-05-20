@@ -2,8 +2,8 @@ import matplotlib.pylab as plt
 from src.storage.datasetrepo import GTSRBRepository
 from src.utils.imgpro import *
 
-
 _, _, _, _, x_test, y_test = GTSRBRepository.load_from_pickle_tf()
+# _, _, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
 
 i_label = 0
 class_num = len(np.unique(y_test))
@@ -25,16 +25,16 @@ for i in range(class_num % col, col):
 
 def _plot_stop(data, col, row):
     _, ax_stop = plt.subplots(row, col)
-    data_num = len(data)
     for i in range(len(data)):
         ax_stop[int(i / col), i % col].imshow(data[i])
         ax_stop[int(i / col), i % col].set_title(str(i + 1))
         ax_stop[int(i / col), i % col].axis('off')
 
-    for i in range(data_num % col, col):
-        ax_stop[row - 1][i].imshow(np.ones((32, 32, 3)))
-        ax_stop[row - 1][i].axis('off')
 
+x_test = x_test[y_test == 14][:40]
+x_test = rescale_gtsrb(images=x_test)
+row = int(len(x_test) / col) if len(x_test) % col == 0 else int(len(x_test) / col) + 1
+_plot_stop(data=x_test, col=col, row=row)
 
 x_stop = GTSRBRepository.load_from_images(dir_name='victim-set')
 row = int(len(x_stop) / col) if len(x_stop) % col == 0 else int(len(x_stop) / col) + 1
