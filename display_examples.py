@@ -1,10 +1,9 @@
 import matplotlib.pylab as plt
 from src.storage.datasetrepo import GTSRBRepository
+from src.storage.resultsrepo import ResultsRepository
 from src.utils.imgpro import *
-import torch
 
 _, _, _, _, x_test, y_test = GTSRBRepository.load_from_pickle_tf()
-# _, _, x_test, y_test = GTSRBRepository.load_from_pickle(is_jitter=False)
 
 i_label = 0
 class_num = len(np.unique(y_test))
@@ -47,6 +46,14 @@ _plot_stop(data=x_stop, col=col, row=row)
 x_stop = scale_gtsrb(images=resize(img=x_stop, size=(32, 32)))
 x_stop += 0.5
 _plot_stop(data=x_stop, col=col, row=row)
+
+# 32 x 32 adversarial examples
+noisy_inputs_32 = ResultsRepository.load_as_pickle(filename='gtsrb-noisy-inputs-32')
+_plot_stop(data=noisy_inputs_32, col=col, row=row)
+
+# 256 x 256 adversarial examples
+noisy_inputs_256 = ResultsRepository.load_as_pickle(filename='gtsrb-noisy-inputs-256')
+_plot_stop(data=noisy_inputs_256, col=col, row=row)
 
 plt.show()
 
