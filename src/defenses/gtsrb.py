@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import List
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -59,11 +58,10 @@ class GTSRBAdversarialTraining:
                 optimizer.step()
 
                 running_loss += loss.item()
-                self._evaluate(epoch=epoch + 1, running_loss=running_loss, batch_inputs=inputs, batch_labels=labels)
+            self._evaluate(epoch=epoch + 1, running_loss=running_loss)
 
         self.model.eval()
-        correct, total = self._accuracy_from_data_loader(data_loader=self.test_loader)
-        print('Accuracy: {:.2f} %%'.format(100 * float(correct / total)))
+        print('Accuracy: {:.2f} %%'.format(self._accuracy(data_loader=self.test_loader)))
         ModelRepository.save(filename='GTSRB/pdg_model', model=self.model)
         print(time() - start_at)
 
@@ -96,31 +94,18 @@ class GTSRBAdversarialTraining:
         )
         return train_loader, valid_loader, test_loader
 
-    def _evaluate(self, epoch: int, running_loss: float, batch_inputs: torch.Tensor, batch_labels: torch.Tensor):
+    def _evaluate(self, epoch: int, running_loss: float):
         self.model.eval()
-        train_correct, train_total = self._accuracy(inputs=batch_inputs, labels=batch_labels)
-        valid_correct, valid_total = self._accuracy_from_data_loader(data_loader=self.valid_loader)
-        test_correct, test_total = self._accuracy_from_data_loader(data_loader=self.test_loader)
         print('[{:d}/{:d}] loss: {:.3f} train acc: {:.3f} valid acc: {:.3f} test acc: {:.3f}'.format(
             epoch,
             self.epochs,
             running_loss / self.batch_size,
-            100 * float(train_correct / train_total),
-            100 * float(valid_correct / valid_total),
-            100 * float(test_correct / test_total)
+            self._accuracy(data_loader=self.train_loader, is_for_all=False),
+            self._accuracy(data_loader=self.valid_loader),
+            self._accuracy(data_loader=self.test_loader)
         ))
 
-    def _accuracy(self, inputs: torch.Tensor, labels: torch.Tensor) -> List[int]:
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            outputs = self.model(inputs)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-        return correct, total
-
-    def _accuracy_from_data_loader(self, data_loader) -> List[int]:
+    def _accuracy(self, data_loader, is_for_all: bool = True) -> float:
         correct = 0
         total = 0
         with torch.no_grad():
@@ -131,4 +116,6 @@ class GTSRBAdversarialTraining:
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-        return correct, total
+                if not is_for_all:
+                    break
+        return 100 * float(correct / total)
