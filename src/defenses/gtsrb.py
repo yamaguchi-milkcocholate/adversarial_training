@@ -33,7 +33,7 @@ class GTSRBAdversarialTraining:
         self.model.to(self.device)
         summary(self.model, (3, 32, 32))
 
-    def run(self, epochs: int):
+    def run(self, epochs: int, pdg_iteration: int):
         self.epochs = epochs
         start_at = time()
         criterion = nn.CrossEntropyLoss()
@@ -49,7 +49,7 @@ class GTSRBAdversarialTraining:
                 labels = labels.to(self.device)
                 delta = multi_step_attack(
                     model=self.model, X=inputs, y=labels, input_range=self.input_range,
-                    epsilon=8 / 255, alpha=2 / 255, num_iter=40, randomize=True
+                    epsilon=8 / 255, alpha=4 / 255, num_iter=pdg_iteration, randomize=True
                 )
                 inputs += delta
                 outputs = self.model(inputs)
