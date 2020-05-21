@@ -30,6 +30,11 @@ class BaseRepository(ABC):
         with open(path, 'wb') as f:
             pickle.dump(data, f)
 
+    @classmethod
+    def load_as_pickle(cls, filename):
+        with open(os.path.join(os.path.dirname(__file__), cls.DIR_NAME + '/{0}.p'.format(filename)), mode='rb') as f:
+            return pickle.load(f)
+
 
 class LISARepository(BaseRepository):
     DIR_NAME = 'datasets/LISA'

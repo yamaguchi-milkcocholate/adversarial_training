@@ -66,14 +66,14 @@ def _save_results(noise: torch.Tensor, noisy_inputs: torch.Tensor):
     noise, noisy_inputs = noise.detach().numpy(), noisy_inputs.detach().numpy()
     noise, noisy_inputs = reshape_to_pil(images=noise), reshape_to_pil(images=noisy_inputs)
 
-    ResultsRepository.save_as_pickle(filename='gtsrb-noise-input-32.p', data=noise)
-    ResultsRepository.save_as_pickle(filename='gtsrb-noisy-inputs-32.p', data=noisy_inputs)
+    ResultsRepository.save_as_pickle(filename='gtsrb-noise-input-32', data=noise)
+    ResultsRepository.save_as_pickle(filename='gtsrb-noisy-inputs-32', data=noisy_inputs)
     noise = rescale_gtsrb(images=noise)
     noisy_inputs = rescale_gtsrb(images=noisy_inputs)
-    noise = resize(img=noise, size=(256, 256))
-    noisy_inputs = resize(img=noisy_inputs, size=(256, 256))
-    ResultsRepository.save_as_pickle(filename='gtsrb-noise-input-256.p', data=noise)
-    ResultsRepository.save_as_pickle(filename='gtsrb-noisy-inputs-256.p', data=noisy_inputs)
+    noise = resize(img=noise, size=(256, 256)).astype(np.uint8)
+    noisy_inputs = resize(img=noisy_inputs, size=(256, 256)).astype(np.uint8)
+    ResultsRepository.save_as_pickle(filename='gtsrb-noise-input-256', data=noise)
+    ResultsRepository.save_as_pickle(filename='gtsrb-noisy-inputs-256', data=noisy_inputs)
 
 
 if __name__ == '__main__':
