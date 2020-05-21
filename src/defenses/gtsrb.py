@@ -14,10 +14,11 @@ from src.attacks.tools.pgd import multi_step_attack
 
 class GTSRBAdversarialTraining:
 
-    def __init__(self, batch_size: int, lr: float, wd: float):
+    def __init__(self, batch_size: int, lr: float, wd: float, epsilon: int):
         self.batch_size = batch_size
         self.lr = lr
         self.wd = wd
+        self.epsilon = epsilon
         self.input_size = (32, 32)
         self.input_range = (-0.5, 0.5)
         self.epochs = None
@@ -49,7 +50,7 @@ class GTSRBAdversarialTraining:
                 labels = labels.to(self.device)
                 delta = multi_step_attack(
                     model=self.model, X=inputs, y=labels, input_range=self.input_range,
-                    epsilon=8 / 255, alpha=4 / 255, num_iter=pdg_iteration, randomize=True
+                    epsilon=self.epsilon / 255, alpha=4 / 255, num_iter=pdg_iteration, randomize=True
                 )
                 inputs += delta
                 outputs = self.model(inputs)
