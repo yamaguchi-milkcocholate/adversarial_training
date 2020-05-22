@@ -14,7 +14,7 @@ def _plot_stop(data, col, row):
         ax_stop[int(i / col), i % col].axis('off')
 
 
-def display():
+def display(method: str):
     x_stop = GTSRBRepository.load_from_images(dir_name='victim-set')
     row = 4
     col = 10
@@ -27,23 +27,23 @@ def display():
     x_stop += 0.5
     _plot_stop(data=x_stop, col=col, row=row)
 
-    for model in ['model', 'pdg_model_8', 'pdg_model_16']:
+    for model in ['model']:
         # 32 x 32 adversarial examples
         noisy_inputs_32 = ResultsRepository.load_as_pickle(
-            filename=os.path.join(model, 'gtsrb-noisy-inputs-32'))
+            filename=os.path.join(method+'&'+model, 'gtsrb-noisy-inputs-32'))
         _plot_stop(data=noisy_inputs_32, col=col, row=row)
 
         # 256 x 256 adversarial examples
         noisy_inputs_256 = ResultsRepository.load_as_pickle(
-            filename=os.path.join(model, 'gtsrb-noisy-inputs-256'))
+            filename=os.path.join(method+'&'+model, 'gtsrb-noisy-inputs-256'))
         _plot_stop(data=noisy_inputs_256, col=col, row=row)
 
     plt.show()
 
 
-def plot_success_rate():
+def plot_success_rate(method: str):
     for model in ['model', 'pdg_model_8', 'pdg_model_16']:
-        history = ResultsRepository.load_as_pickle(filename=os.path.join(model, 'history'))
+        history = ResultsRepository.load_as_pickle(filename=os.path.join(method+'&'+model, 'history'))
         plt.plot(np.arange(len(history['adv_sr'])), history['adv_sr'], label=model)
     plt.legend()
     plt.xlabel('#Iteration')
@@ -52,5 +52,7 @@ def plot_success_rate():
 
 
 if __name__ == '__main__':
-    # display()
-    plot_success_rate()
+    # display(method='gtsrb')
+    display(method='pdg')
+    # plot_success_rate(method='gtsrb')
+    # plot_success_rate(method='pdg')
