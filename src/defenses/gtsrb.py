@@ -50,7 +50,7 @@ class GTSRBAdversarialTraining:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 noise = torch.zeros_like(inputs)
-                for _ in pdg_iteration:
+                for _ in range(pdg_iteration):
                     noise = projected_gradient_descent(
                         model=self.model, X=inputs, y=labels, input_range=self.input_range,
                         noise=noise, epsilon=self.epsilon / 255, alpha=self.alpha / 255
