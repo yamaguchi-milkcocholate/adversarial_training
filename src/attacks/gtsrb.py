@@ -7,14 +7,19 @@ from src.utils.imgpro import *
 from src.utils.stats import success_rate
 from src.attacks.tools.criterion import PhysicalRobustCriterion
 from src.storage.resultsrepo import ResultsRepository
+import os
 
 
 class GTSRBAttacker:
+    METHOD = 'gtsrb'
 
-    def __init__(self, target_class: int):
+    def __init__(self, target_class: int, model_filename: str):
         self.device = torch.device('cpu')
+        self.results_folder_name = self.METHOD+'&'+model_filename
         self.model = GTSRBCNN()
-        self.model = ModelRepository.load(filename='GTSRB/model', device=self.device, model=self.model)
+        self.model = ModelRepository.load(
+            filename=os.path.join('GTSRB', model_filename), device=self.device, model=self.model
+        )
         self.model.eval()
         self.target_class = target_class
         self.true_class = 14
@@ -28,21 +33,27 @@ class GTSRBAttacker:
         self.is_terminated = None
         self.results_filename = {
             '32': {
-                'noise': 'gtsrb-noise-32',
-                'noisy_inputs': 'gtsrb-noisy-inputs-32'
+                'noise': os.path.join(self.results_folder_name, 'gtsrb-noise-32'),
+                'noisy_inputs': os.path.join(self.results_folder_name, 'gtsrb-noisy-inputs-32')
             },
             '256': {
-                'noise': 'gtsrb-noise-256',
-                'noisy_inputs': 'gtsrb-noisy-inputs-256'
-            }
+                'noise': os.path.join(self.results_folder_name, 'gtsrb-noise-256'),
+                'noisy_inputs': os.path.join(self.results_folder_name, 'gtsrb-noisy-inputs-256')
+            },
+            'overview': os.path.join(self.results_folder_name, 'overview'),
+            'history': os.path.join(self.results_folder_name, 'history'),
+        }
+        self.history = {
+            'adv_loss': list(), 'adv_sr': list(), 'nor_sr': list(),
         }
 
-    def run(self, iteration):
+    def run(self, iteration, is_terminate_when_success=False):
         self.iteration = iteration
         self.is_terminated = False
         # Todo: initial noise is 0.0 which is different from the original code.
         noise = torch.tensor(np.random.normal(0.0, 1.0, self.mask.shape) * 0.0, dtype=torch.float32, requires_grad=True)
         noisy_inputs = add_noise(inputs=self.inputs, noise=noise, mask=self.mask)
+        self._evaluate(outputs=self.model(noisy_inputs), loss=0.0, i=-1)
 
         criterion = PhysicalRobustCriterion()
         optimizer = torch.optim.Adam([noise])  # Todo: lr & eps are different
@@ -50,28 +61,31 @@ class GTSRBAttacker:
         for i in range(self.iteration):
             optimizer.zero_grad()
             outputs = self.model(noisy_inputs)
-            loss = criterion(outputs, self.labels, noise=noise)
+            loss = criterion(outputs, self.labels, noise=noise, mask=self.mask)
             loss.backward()
             optimizer.step()
             noisy_inputs = add_noise(inputs=self.inputs, noise=noise, mask=self.mask)
 
             self._evaluate(outputs=outputs, loss=loss.item(), i=i)
-            if self.is_terminated:
+            if self.is_terminated and is_terminate_when_success:
                 break
 
         self._save_results(noise=noise, noisy_inputs=noisy_inputs)
 
     def _evaluate(self, outputs, loss, i):
-        atc_sr = success_rate(outputs=outputs, labels=self.labels)
+        adv_sr = success_rate(outputs=outputs, labels=self.labels)
         nor_sr = success_rate(outputs=outputs, labels=self.true_labels)
-        print('[{:d}/{:d}] loss: {:.3f} attack_sr: {:.3f} normal_acc: {:.3f}'.format(
+        print('[{:d}/{:d}] adv_loss: {:.3f} adv_sr: {:.3f} nor_acc: {:.3f}'.format(
             i + 1,
             self.iteration,
             loss,
-            atc_sr,
+            adv_sr,
             nor_sr
         ))
-        if atc_sr == 100.0:
+        self.history['adv_loss'].append(loss)
+        self.history['adv_sr'].append(adv_sr)
+        self.history['nor_sr'].append(nor_sr)
+        if adv_sr == 100.0:
             self.is_terminated = True
 
     def _prepare_dataset(self) -> List[torch.Tensor]:
@@ -94,12 +108,21 @@ class GTSRBAttacker:
         noise_256 = resize(img=noise_32, size=self.image_size).astype(np.uint8)
         noisy_inputs_256 = resize(img=noisy_inputs_32, size=self.image_size).astype(np.uint8)
 
+        ResultsRepository.make_results_folder(folder_name=self.results_folder_name)
         ResultsRepository.save_as_pickle(filename=self.results_filename['32']['noise'], data=noise_32)
         ResultsRepository.save_as_pickle(filename=self.results_filename['32']['noisy_inputs'], data=noisy_inputs_32)
         ResultsRepository.save_as_pickle(filename=self.results_filename['256']['noise'], data=noise_256)
         ResultsRepository.save_as_pickle(filename=self.results_filename['256']['noisy_inputs'], data=noisy_inputs_256)
+        ResultsRepository.save_as_pickle(filename=self.results_filename['history'], data=self.history)
+        ResultsRepository.write_items(filename=self.results_filename['overview'], items=self._itemize_model_overview())
+
+    def _itemize_model_overview(self) -> List[tuple]:
+        return [
+            ('iteration', self.iteration),
+        ]
 
 
 if __name__ == '__main__':
-    attacker = GTSRBAttacker(target_class=5)
-    attacker.run(iteration=15)
+    for model in ['model', 'pdg_model_8', 'pdg_model_16']:
+        attacker = GTSRBAttacker(target_class=5, model_filename=model)
+        attacker.run(iteration=50)
