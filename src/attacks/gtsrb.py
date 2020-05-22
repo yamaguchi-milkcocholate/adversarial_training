@@ -123,6 +123,6 @@ class GTSRBAttacker:
 
 
 if __name__ == '__main__':
-    for model in ['model', 'pdg_model_8', 'pdg_model_16']:
+    for model in ['model', 'pdg_model_12', 'pdg_model_16']:
         attacker = GTSRBAttacker(target_class=5, model_filename=model)
-        attacker.run(iteration=50)
+        attacker.run(iteration=50, is_terminate_when_success=True)
