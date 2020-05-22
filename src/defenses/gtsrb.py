@@ -9,16 +9,17 @@ from time import time
 from src.storage.modelrepo import ModelRepository
 from src.storage.datasetrepo import GTSRBRepository
 from src.trains.models import GTSRBCNN
-from src.attacks.tools.pgd import multi_step_attack
+from src.attacks.tools.pgd import projected_gradient_descent
 
 
 class GTSRBAdversarialTraining:
 
-    def __init__(self, batch_size: int, lr: float, wd: float, epsilon: int):
+    def __init__(self, batch_size: int, lr: float, wd: float, epsilon: int, alpha: int):
         self.batch_size = batch_size
         self.lr = lr
         self.wd = wd
         self.epsilon = epsilon
+        self.alpha = alpha
         self.input_size = (32, 32)
         self.input_range = (-0.5, 0.5)
         self.epochs = None
@@ -48,12 +49,13 @@ class GTSRBAdversarialTraining:
                 optimizer.zero_grad()
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
-                delta = multi_step_attack(
-                    model=self.model, X=inputs, y=labels, input_range=self.input_range,
-                    epsilon=self.epsilon / 255, alpha=4 / 255, num_iter=pdg_iteration, randomize=True
-                )
-                inputs += delta
-                outputs = self.model(inputs)
+                noise = torch.zeros_like(inputs)
+                for _ in pdg_iteration:
+                    noise = projected_gradient_descent(
+                        model=self.model, X=inputs, y=labels, input_range=self.input_range,
+                        noise=noise, epsilon=self.epsilon / 255, alpha=self.alpha / 255
+                    )
+                outputs = self.model(inputs + noise)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
