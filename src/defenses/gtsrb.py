@@ -48,6 +48,7 @@ class GTSRBAdversarialTraining:
             for i, (inputs, labels) in enumerate(self.train_loader, 0):
                 optimizer.zero_grad()
                 inputs = inputs.to(self.device)
+                inputs = inputs.require_grad_()
                 labels = labels.to(self.device)
                 noise = torch.zeros_like(inputs, requires_grad=True).to(self.device)
                 for _ in range(pdg_iteration):
