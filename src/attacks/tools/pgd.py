@@ -21,6 +21,8 @@ def projected_gradient_descent(model: Module, X: Tensor, y: Tensor, input_range:
     inputs.retain_grad()
     loss = torch.nn.CrossEntropyLoss()(model(inputs), y)
     loss.backward(retain_graph=True)
+    print(inputs.is_leaf, inputs.retain_grad())
+    print(noise.is_leaf, noise.retain_grad())
     new_noise = (noise - alpha * inputs.grad.detach().sign()).clamp(-epsilon, epsilon)
     new_noise = (X + new_noise).clamp(input_range[0], input_range[1]) - X
     return new_noise.detach()
