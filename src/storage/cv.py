@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
 import cv2
+import os
 from src.storage.datasetrepo import GTSRBRepository
 
 
@@ -118,3 +119,12 @@ def pre_precess_gtsrb(gen_size: int):
     GTSRBRepository.save_as_pickle(filename='jitter_test', data={
         'features': rx_test, 'labels': y_test
     })
+
+
+def printable_colors(is_gtsrb=True):
+    colors = np.loadtxt(os.path.join(os.path.dirname(__file__), 'color/printable_color'), delimiter=',')
+    colors = colors.reshape((colors.shape[1], colors.shape[0]))
+    if is_gtsrb:
+        return colors - 0.5
+    else:
+        return colors
